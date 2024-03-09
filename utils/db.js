@@ -20,11 +20,24 @@ class DBClient {
   }
 
   async nbUsers() {
-    return this.client.db().collections('users').countDocuments()
+    return this.client.db().collection('users').countDocuments()
   }
 
   async nbFiles() {
-    return this.client.db().collections('files').countDocuments()
+    return this.client.db().collection('files').countDocuments()
+  }
+
+  async getUsers() {
+    return await this.client.db().collection('user').find({}).toArray
+  }
+
+  async getUserByEmail(email) {
+    return await this.client.db().collection('user').findOne({'email': email})
+  }
+
+  async insertUser(doc) {
+    const info = await this.client.db().collection('user').insertOne(doc)
+    return info
   }
 }
 
