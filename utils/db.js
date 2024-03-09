@@ -25,8 +25,8 @@ class DBClient {
     return this.client.db().collection('files').countDocuments();
   }
 
-  async getUsers() {
-    return this.client.db().collection('users').find({}).toArray;
+  async getUser(doc) {
+    return this.client.db().collection('users').findOne(doc);
   }
 
   async getUserByEmail(email) {
