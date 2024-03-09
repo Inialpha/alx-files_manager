@@ -15,7 +15,7 @@ class AppController {
     Promise.all([dbClient.nbUsers(), dbClient.nbFiles()])
       .then(([users, files]) => {
         const response = {
-          user: users,
+          users,
           files,
         };
         res.status(200);
