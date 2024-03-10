@@ -42,9 +42,17 @@ class DBClient {
     return this.client.db().collection('files').findOne(doc);
   }
 
+  async getFiles(doc) {
+    return this.client.db().collection('files').find(doc);
+  }
+
   async insertFile(doc) {
     const info = await this.client.db().collection('files').insertOne(doc);
     return info;
+  }
+
+  async getCollection(col) {
+    return this.client.db().collection(col);
   }
 }
 
