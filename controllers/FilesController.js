@@ -54,7 +54,8 @@ const FilesController = {
     }
 
     if (parentId !== 0) {
-      const parentFile = await dbClient.getFile({ _id: ObjectId(parentId) });
+      parentId = ObjectId(parentId);
+      const parentFile = await dbClient.getFile({ _id: parentId });
       if (!parentFile) {
         res.status(400);
         res.json({ error: 'Parent not found' });
@@ -104,6 +105,84 @@ const FilesController = {
         });
       });
     });
+  },
+
+  async getShow(req, res) {
+    const token = `auth_${req.headers['x-token']}`;
+    const userId = await redisClient.get(token);
+
+    if (!userId) {
+      res.status(401);
+      res.json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const user = await dbClient.getUser({ _id: ObjectId(userId) });
+    if (!user) {
+      res.status(401);
+      res.json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const fileId = req.params ? req.params.id : null;
+    const file = await dbClient.getFile({ userId: user._id, _id: ObjectId(fileId) });
+    if (!file) {
+      res.status(404);
+      res.json({ error: 'Not found' });
+      return;
+    }
+
+    res.json(file);
+  },
+
+  async getIndex(req, res) {
+    const token = `auth_${req.headers['x-token']}`;
+    const userId = await redisClient.get(token);
+    if (!userId) {
+      res.status(401);
+      res.json({ error: 'Unauthorized' });
+
+      return;
+    }
+    const user = await dbClient.getUser({ _id: ObjectId(userId) });
+    if (!user) {
+      res.status(401);
+      res.json({ error: 'Unauthorized' });
+      return;
+    }
+
+    let parentId = req.query ? req.query.parentId : null;
+    let page = req.query ? req.query.page : null;
+    page = Number.parseInt(page, 10);
+    if (Number.isNaN(page)) {
+      page = 0;
+    }
+    if (!parentId) {
+      parentId = 0;
+    } else {
+      parentId = ObjectId(parentId);
+    }
+    const filter = { userId: user._id, parentId };
+
+    const filesCollection = await dbClient.getCollection('files');
+    const files = await filesCollection.aggregate([
+      { $match: filter },
+      { $sort: { _id: -1 } },
+      { $skip: page * 20 },
+      { $limit: 20 },
+      {
+        $project: {
+          _id: 0,
+          id: '$_id',
+          userId: '$userId',
+          name: '$name',
+          type: '$type',
+          isPublic: '$isPublic',
+          parentId: '$parentId',
+        },
+      },
+    ]).toArray();
+    res.status(200).json(files);
   },
 };
 
