@@ -6,7 +6,7 @@ import redisClient from '../utils/redis';
 import dbClient from '../utils/db';
 
 const FilesController = {
-  async getShow(req, res) {
+  async postUpload(req, res) {
     const token = `auth_${req.headers['x-token']}`;
     const userId = await redisClient.get(token);
 
@@ -99,7 +99,7 @@ const FilesController = {
     });
   },
 
-  async postUpload(req, res) {
+  async getShow(req, res) {
     const token = `auth_${req.headers['x-token']}`;
     const userId = await redisClient.get(token);
 
