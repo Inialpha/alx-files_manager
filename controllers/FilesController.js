@@ -123,11 +123,19 @@ const FilesController = {
       res.json({ error: 'Not found' });
       return;
     }
-    file.localpath = undefined
+    const doc = {
+      id: file._id,
+      userId: file.userId,
+      name: file.name,
+      type: file.type,
+      isPublic: file.isPublic,
+      parentId: file.parentId,
+    }
+    /*file.localpath = undefined
     file.id = file._id
-    file._id = undefined
+    file._id = undefined*/
 
-    res.json(file);
+    res.json(doc);
   },
 
   async getIndex(req, res) {
