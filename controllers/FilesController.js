@@ -1,7 +1,8 @@
 import { ObjectId } from 'mongodb';
 import { join } from 'path';
-import fs from 'fs';
+import fs, { statSync, existsSync, realpathSync } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
+import { contentType } from 'mime-types';
 import redisClient from '../utils/redis';
 import dbClient from '../utils/db';
 
@@ -262,8 +263,51 @@ const FilesController = {
     res.status(200).json(updatedFile);
   },
 
-  //async getFile(req, res) {
+  async getFile(req, res) {
+    const token = `auth_${req.headers['x-token']}`;
+    const userId = await redisClient.get(token);
 
+    const { id } = req.params;
+    const file = await dbClient.getFile({ _id: ObjectId(id) });
+    if (!file) {
+      console.log(1);
+      res.status(404);
+      res.json({ error: 'Not found' });
+      return;
+    }
+
+    if (!file.isPublic && file.userId.toString() !== userId) {
+      console.log(2);
+      res.status(404);
+      res.json({ error: 'Not found' });
+      return;
+    }
+
+    if (file.type === 'folder') {
+      res.status(400);
+      res.json({ error: "A folder doesn't have content" });
+      return;
+    }
+
+    if (existsSync(file.localpath)) {
+      const stats = statSync(file.localpath);
+      if (!stats.isFile()) {
+        console.log(3);
+        res.status(404);
+        res.json({ error: 'Not found' });
+        return;
+      }
+    } else {
+      console.log(4);
+      res.status(404);
+      res.json({ error: 'Not found' });
+      return;
+    }
+
+    const fullPath = realpathSync(file.localpath);
+    res.setHeader('Content-Type', contentType(file.name || 'text/plain; charset=utf-8'));
+    res.sendFile(fullPath);
+  },
 
 };
 
