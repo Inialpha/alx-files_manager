@@ -162,7 +162,7 @@ const FilesController = {
       page = 0;
     }
     if (!parentId) {
-      parentId = 0;
+      parentId = '0';
     } else {
       parentId = ObjectId(parentId);
     }
