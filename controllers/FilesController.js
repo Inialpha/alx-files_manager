@@ -123,6 +123,9 @@ const FilesController = {
       res.json({ error: 'Not found' });
       return;
     }
+    file.localpath = undefined
+    file.id = file._id
+    file._id = undefined
 
     res.json(file);
   },
