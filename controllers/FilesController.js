@@ -27,7 +27,7 @@ const FilesController = {
     const type = req.body ? req.body.type : null;
     let parentId = req.body ? req.body.parentId : null;
     if (!parentId) {
-      parentId = 0;
+      parentId = '0';
     }
     let isPublic = req.body ? req.body.isPublic : null;
     if (!isPublic) {
@@ -52,7 +52,7 @@ const FilesController = {
       return;
     }
 
-    if (parentId !== 0) {
+    if (parentId !== '0') {
       parentId = ObjectId(parentId);
       const parentFile = await dbClient.getFile({ _id: parentId });
       if (!parentFile) {
@@ -130,10 +130,10 @@ const FilesController = {
       type: file.type,
       isPublic: file.isPublic,
       parentId: file.parentId,
-    }
-    /*file.localpath = undefined
+    };
+    /* file.localpath = undefined
     file.id = file._id
-    file._id = undefined*/
+    file._id = undefined */
 
     res.json(doc);
   },
@@ -261,6 +261,9 @@ const FilesController = {
     updatedFile._id = undefined;
     res.status(200).json(updatedFile);
   },
+
+  //async getFile(req, res) {
+
 
 };
 
