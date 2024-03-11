@@ -131,9 +131,9 @@ const FilesController = {
       res.json({ error: 'Not found' });
       return;
     }
-     file.localpath = undefined
-    file.id = file._id
-    file._id = undefined
+    file.localpath = undefined;
+    file.id = file._id;
+    file._id = undefined;
     res.json(file);
   },
 
@@ -203,21 +203,25 @@ const FilesController = {
       return;
     }
 
-    const fileId = req.param ? req.param.id : null
+    const fileId = req.params ? req.params.id : null;
 
-    const file = await dbClient.getFile({_id: ObjectId(fileId), userId: user._id})
+    const file = await dbClient.getFile({ _id: ObjectId(fileId), userId: user._id });
     if (!file) {
-      res.status(404)
-      res.json({ error: 'Not found' })
-      return
+      res.status(404);
+      res.json({ error: 'Not found' });
+      return;
     }
 
     const filesCollection = await dbClient.getCollection('files');
-    const filter = {_id: Object(fileId), userId: user._id}
-    const operation = { $set: { isPublic: true } }
-    const doc = await filesCollection.updateOne(filter, operation)
-    res.status(200).json(files)
-  }
+
+    const filter = { _id: ObjectId(fileId), userId: user._id };
+    const operation = { $set: { isPublic: true } };
+    const updatedFile = await filesCollection.findOne(filter);
+    updatedFile.localpath = undefined;
+    updatedFile.id = updatedFile._id;
+    updatedFile._id = undefined;
+    res.status(200).json(updatedFile);
+  },
 
 };
 
